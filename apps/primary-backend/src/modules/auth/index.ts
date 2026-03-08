@@ -6,6 +6,7 @@ export const authRoutes = new Elysia({ prefix: "/auth" })
   .post(
     "/sign-in",
     async ({ body, cookie: { session } }) => {
+
       const response = await AuthService.signIn(body);
       return response;
     },
@@ -19,9 +20,22 @@ export const authRoutes = new Elysia({ prefix: "/auth" })
   )
   .post(
     "/sign-up",
-    async ({ body }) => {
-      const response = await AuthService.signUp(body);
-      return response;
+    async ({ body, status }) => {
+      try {
+        const { password, email } = body
+        const hashedPassword = await Bun.password.hash(password)
+        const response = await AuthService.signUp({
+          email, password: hashedPassword
+        });
+        return response;
+
+      } catch (error) {
+        // TODO: Cretae a global error handler package to handle all kind of errors
+        console.error(error)
+        return status(400, {
+          message: 'Sign up failed'
+        })
+      }
     },
     {
       body: AuthModel.signUpBody,
