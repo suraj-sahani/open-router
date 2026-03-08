@@ -10,8 +10,9 @@ export const AuthModel = {
     message: t.String(),
     token: t.String(),
   }),
-  signInInvalid: t.Literal("Invalid username or password"),
-
+  signInError: t.Object({
+    message: t.Literal("Invalid username or password")
+  }),
   signUpBody: t.Object({
     email: t.String(),
     password: t.String(),
@@ -20,7 +21,9 @@ export const AuthModel = {
     message: t.String(),
     id: t.String(),
   }),
-  signUpUserExists: t.Literal("User already exists"),
+  signUpError: t.Object({
+    message: t.Literal('Sign up failed')
+  })
 } as const;
 
 // Optional, cast all model to TypeScript type

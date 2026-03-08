@@ -13,7 +13,7 @@ export const authRoutes = new Elysia({ prefix: "/auth" })
       body: AuthModel.signInBody,
       response: {
         200: AuthModel.signInResponse,
-        400: AuthModel.signInInvalid,
+        400: AuthModel.signInError,
       },
     },
   )
@@ -24,10 +24,10 @@ export const authRoutes = new Elysia({ prefix: "/auth" })
       return response;
     },
     {
-      body: AuthModel.signInBody,
+      body: AuthModel.signUpBody,
       response: {
         200: AuthModel.signUpResponse,
-        400: AuthModel.signUpUserExists,
+        400: AuthModel.signUpError
       },
     },
   );
