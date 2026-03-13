@@ -1,14 +1,39 @@
 import { Elysia } from "elysia";
 import { AuthService } from "./service";
 import { AuthModel } from "./model";
+import jwt from "@elysiajs/jwt";
 
 export const authRoutes = new Elysia({ prefix: "/auth" })
+  .use(
+    jwt({
+      name: "jwt",
+      secret: process.env.JWT_SECRET!,
+    }),
+  )
   .post(
     "/sign-in",
-    async ({ body, cookie: { session } }) => {
-
+    async ({ body, cookie: { auth }, status, jwt }) => {
       const response = await AuthService.signIn(body);
-      return response;
+
+      if (!response)
+        return status(400, { message: "Invalid username or password" });
+
+      const { user } = response;
+      const token = jwt.sign({
+        id: user.id,
+      });
+
+      auth.set({
+        value: token,
+        httpOnly: true,
+        maxAge: 7 * 86400,
+        path: "/",
+      });
+
+      return {
+        message: "Sign in successful",
+        user_id: user.id,
+      };
     },
     {
       body: AuthModel.signInBody,
@@ -22,26 +47,26 @@ export const authRoutes = new Elysia({ prefix: "/auth" })
     "/sign-up",
     async ({ body, status }) => {
       try {
-        const { password, email } = body
-        const hashedPassword = await Bun.password.hash(password)
+        const { password, email } = body;
+        const hashedPassword = await Bun.password.hash(password);
         const response = await AuthService.signUp({
-          email, password: hashedPassword
+          email,
+          password: hashedPassword,
         });
         return response;
-
       } catch (error) {
         // TODO: Cretae a global error handler package to handle all kind of errors
-        console.error(error)
+        console.error(error);
         return status(400, {
-          message: 'Sign up failed'
-        })
+          message: "Sign up failed",
+        });
       }
     },
     {
       body: AuthModel.signUpBody,
       response: {
         200: AuthModel.signUpResponse,
-        400: AuthModel.signUpError
+        400: AuthModel.signUpError,
       },
     },
   );
