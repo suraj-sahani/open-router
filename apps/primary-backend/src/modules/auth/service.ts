@@ -35,18 +35,6 @@ export abstract class AuthService {
       throw new Error("Invalid username or password.");
     }
 
-    if (user) {
-      const isPasswordCorrect = await Bun.password.verify(
-        password,
-        user.password,
-      );
-
-      if (isPasswordCorrect) {
-      } else {
-        throw new Error("Invalid username or password.");
-      }
-    }
-
     return {
       message: "Signed up successfully",
       id: user.id,
