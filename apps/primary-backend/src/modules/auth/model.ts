@@ -28,5 +28,5 @@ export const AuthModel = {
 
 // Optional, cast all model to TypeScript type
 export type TAuthModel = {
-  [k in keyof typeof AuthModel]: UnwrapSchema<(typeof AuthModel)[k]>;
+  [K in keyof typeof AuthModel]: UnwrapSchema<(typeof AuthModel)[K]>;
 };

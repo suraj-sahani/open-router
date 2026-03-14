@@ -2,28 +2,34 @@ import { prisma } from "db";
 import { type TAuthModel } from "./model";
 
 export abstract class AuthService {
-  static async signIn({ email, password }: TAuthModel["signInBody"]) {
+  static async signIn({
+    email,
+    password,
+  }: TAuthModel["signInBody"]): Promise<TAuthModel["signInResponse"]> {
     const user = await prisma.user.findUnique({
       where: { email },
     });
 
     if (!user) {
-      return null;
+      throw new Error("Invalid username or password.");
     }
 
     const matchPassword = await Bun.password.verify(password, user.password);
 
     if (!matchPassword) {
-      return null;
+      throw new Error("Invalid username or password.");
     }
 
     return {
       message: "Signed in successfully",
-      user,
+      user_id: user.id,
     };
   }
 
-  static async signUp({ email, password }: TAuthModel["signUpBody"]) {
+  static async signUp({
+    email,
+    password,
+  }: TAuthModel["signUpBody"]): Promise<TAuthModel["signUpResponse"]> {
     const user = await prisma.user.create({
       data: {
         email,

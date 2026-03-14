@@ -15,9 +15,9 @@ export const authRoutes = new Elysia({ prefix: "/auth" })
         if (!response)
           return status(400, { message: "Invalid username or password" });
 
-        const { user } = response;
+        const { user_id } = response;
         const token = await jwt.sign({
-          id: user.id,
+          id: user_id,
         });
 
         auth.set({
@@ -29,7 +29,7 @@ export const authRoutes = new Elysia({ prefix: "/auth" })
 
         return {
           message: "Sign in successful",
-          user_id: user.id,
+          user_id: user_id,
         };
       } catch (error) {
         return status(400, { message: "Invalid username or password" });
