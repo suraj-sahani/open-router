@@ -5,6 +5,13 @@
   "exports": {
     ".": "./index.ts"
   },
+  "scripts": {
+    "db:migrate": "bunx --bun prisma migrate dev",
+    "db:generate": "bunx --bun prisma generate",
+    "db:push": "bunx --bun prisma db push",
+    "db:studio": "bunx --bun prisma studio",
+    "db:seed": "bunx --bun prisma db seed"
+  },
   "private": true,
   "devDependencies": {
     "@types/bun": "latest",
