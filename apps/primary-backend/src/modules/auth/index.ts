@@ -2,38 +2,38 @@ import { Elysia } from "elysia";
 import { AuthService } from "./service";
 import { AuthModel } from "./model";
 import jwt from "@elysiajs/jwt";
+import { withAuth } from "../../middleware/auth";
 
 export const authRoutes = new Elysia({ prefix: "/auth" })
-  .use(
-    jwt({
-      name: "jwt",
-      secret: process.env.JWT_SECRET!,
-    }),
-  )
+  .use(withAuth)
   .post(
     "/sign-in",
     async ({ body, cookie: { auth }, status, jwt }) => {
-      const response = await AuthService.signIn(body);
+      try {
+        const response = await AuthService.signIn(body);
 
-      if (!response)
+        if (!response)
+          return status(400, { message: "Invalid username or password" });
+
+        const { user } = response;
+        const token = await jwt.sign({
+          id: user.id,
+        });
+
+        auth.set({
+          value: token,
+          httpOnly: true,
+          maxAge: 7 * 86400,
+          path: "/",
+        });
+
+        return {
+          message: "Sign in successful",
+          user_id: user.id,
+        };
+      } catch (error) {
         return status(400, { message: "Invalid username or password" });
-
-      const { user } = response;
-      const token = jwt.sign({
-        id: user.id,
-      });
-
-      auth.set({
-        value: token,
-        httpOnly: true,
-        maxAge: 7 * 86400,
-        path: "/",
-      });
-
-      return {
-        message: "Sign in successful",
-        user_id: user.id,
-      };
+      }
     },
     {
       body: AuthModel.signInBody,

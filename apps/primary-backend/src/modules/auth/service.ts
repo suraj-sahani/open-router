@@ -1,5 +1,5 @@
 import { prisma } from "db";
-import { AuthModel, type TAuthModel } from "./model";
+import { type TAuthModel } from "./model";
 
 export abstract class AuthService {
   static async signIn({ email, password }: TAuthModel["signInBody"]) {
