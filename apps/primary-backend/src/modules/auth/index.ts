@@ -8,7 +8,7 @@ export const authRoutes = new Elysia({ prefix: "/auth" })
   .use(withAuth)
   .post(
     "/sign-in",
-    async ({ body, cookie: { auth }, status, jwt }) => {
+    async ({ body, cookie: { Authorization }, status, jwt }) => {
       try {
         const response = await AuthService.signIn(body);
 
@@ -20,7 +20,7 @@ export const authRoutes = new Elysia({ prefix: "/auth" })
           id: user_id,
         });
 
-        auth.set({
+        Authorization.set({
           value: token,
           httpOnly: true,
           maxAge: 7 * 86400,

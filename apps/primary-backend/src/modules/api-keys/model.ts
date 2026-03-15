@@ -3,7 +3,7 @@ import { t, type UnwrapSchema } from "elysia";
 export const APIKeyModel = {
   createAPIKeyBody: t.Object({
     name: t.String(),
-    user_id: t.String(),
+    user_id: t.Optional(t.String()),
   }),
   createAPIKeyResponse: t.Object({
     message: t.String(),
@@ -11,11 +11,12 @@ export const APIKeyModel = {
     apiKey: t.String(),
   }),
   createAPIKeyError: t.Object({
-    message: t.Literal("API key creation failed"),
+    message: t.String(),
   }),
 
   disableAPIKeyBody: t.Object({
     id: t.String(),
+    user_id: t.String(),
   }),
   disableAPIKeyResponse: t.Object({
     message: t.String(),
@@ -24,22 +25,39 @@ export const APIKeyModel = {
     message: t.Literal("API key disable failed"),
   }),
 
-  getAPIKeyBody: t.Object({
+  enableAPIKeyBody: t.Object({
     id: t.String(),
+    user_id: t.String(),
   }),
-  getAPIKeyResponse: t.Object({
-    lastUsed: t.Nullable(t.String()),
-    id: t.String(),
-    name: t.String(),
-    apiKey: t.String(),
-    creditsConsumed: t.Number(),
+  enableAPIKeyResponse: t.Object({
+    message: t.String(),
   }),
-  getAPIKeyError: t.Object({
-    message: t.Literal("API key not found"),
+  enableAPIKeyError: t.Object({
+    message: t.Literal("API key enable failed"),
+  }),
+
+  getAPIKeysBody: t.Object({
+    user_id: t.String(),
+  }),
+  getAPIKeysResponse: t.Object({
+    apiKeys: t.Array(
+      t.Object({
+        lastUsed: t.Nullable(t.String()),
+        id: t.String(),
+        name: t.String(),
+        apiKey: t.String(),
+        creditsConsumed: t.Number(),
+        disabled: t.Boolean(),
+      }),
+    ),
+  }),
+  getAPIKeysError: t.Object({
+    message: t.String(),
   }),
 
   deleteAPIKeyBody: t.Object({
     id: t.String(),
+    user_id: t.String(),
   }),
   deleteAPIKeyResponse: t.Object({
     message: t.Literal("API key deleted successfully"),

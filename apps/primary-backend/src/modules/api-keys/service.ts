@@ -1,7 +1,27 @@
 import { prisma } from "db";
+import { randomBytes } from "crypto";
 import { TAPIKeyModel } from "./model";
 
 export abstract class APIKeyService {
+  static generateApiKey(length: number = 32): string {
+    try {
+      const prefix = "sk-or-v1-";
+
+      const chars =
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+      const bytes = randomBytes(length);
+
+      let randomPart = "";
+      for (let i = 0; i < length; i++) {
+        randomPart += chars[bytes[i] % chars.length];
+      }
+
+      return `${prefix}${randomPart}`;
+    } catch (error) {
+      throw new Error("API key generation failed");
+    }
+  }
+
   static async createAPIKey({
     name,
     user_id,
@@ -11,18 +31,19 @@ export abstract class APIKeyService {
     const existingKey = await prisma.apiKey.findFirst({
       where: {
         name,
+        userId: user_id,
       },
     });
 
     if (existingKey) throw new Error("API key with same name already exists");
 
-    const generateKey = "sjkbcsdjkbxc";
+    const generateKey = this.generateApiKey();
 
     const createdKey = await prisma.apiKey.create({
       data: {
         name,
         apiKey: generateKey,
-        userId: user_id,
+        userId: user_id || "",
       },
     });
 
@@ -35,12 +56,14 @@ export abstract class APIKeyService {
 
   static async disableAPIKey({
     id,
+    user_id,
   }: TAPIKeyModel["disableAPIKeyBody"]): Promise<
     TAPIKeyModel["disableAPIKeyResponse"]
   > {
     const disabledKey = await prisma.apiKey.update({
       where: {
         id,
+        userId: user_id,
       },
       data: {
         disabled: true,
@@ -49,6 +72,27 @@ export abstract class APIKeyService {
 
     return {
       message: "API key disabled successfully",
+    };
+  }
+
+  static async enableAPIKey({
+    id,
+    user_id,
+  }: TAPIKeyModel["enableAPIKeyBody"]): Promise<
+    TAPIKeyModel["enableAPIKeyResponse"]
+  > {
+    const enabledKey = await prisma.apiKey.update({
+      where: {
+        id,
+        userId: user_id,
+      },
+      data: {
+        disabled: false,
+      },
+    });
+
+    return {
+      message: "API key enabled successfully",
     };
   }
 
@@ -71,27 +115,30 @@ export abstract class APIKeyService {
     };
   }
 
-  static async getApiKey({
-    id,
-  }: TAPIKeyModel["getAPIKeyBody"]): Promise<
-    TAPIKeyModel["getAPIKeyResponse"]
+  static async getApiKeys({
+    user_id,
+  }: TAPIKeyModel["getAPIKeysBody"]): Promise<
+    TAPIKeyModel["getAPIKeysResponse"]
   > {
-    const key = await prisma.apiKey.findUnique({
+    const keys = await prisma.apiKey.findMany({
       where: {
-        id,
+        userId: user_id,
       },
     });
 
-    if (!key) {
-      throw new Error("API key not found");
-    }
+    const apiKeys = keys.map(
+      ({ apiKey, name, creditsConsumed, lastUsed, id, disabled }) => ({
+        name,
+        apiKey,
+        creditsConsumed,
+        lastUsed: lastUsed ? lastUsed.toISOString() : null,
+        disabled,
+        id,
+      }),
+    );
 
     return {
-      id: key?.id,
-      name: key?.name,
-      apiKey: key?.apiKey,
-      creditsConsumed: key?.creditsConsumed,
-      lastUsed: key.lastUsed ? key?.lastUsed?.toISOString() : null,
+      apiKeys,
     };
   }
 }
