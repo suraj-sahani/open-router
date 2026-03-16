@@ -32,6 +32,7 @@ export const authRoutes = new Elysia({ prefix: "/auth" })
           user_id: user_id,
         };
       } catch (error) {
+        console.error(error);
         return status(400, { message: "Invalid username or password" });
       }
     },
