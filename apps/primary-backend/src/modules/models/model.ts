@@ -42,6 +42,10 @@ export const LLMModelsModel = {
       }),
     ),
   }),
+
+  genericServiceError: t.Object({
+    message: t.String(),
+  }),
 };
 
 export type TLLMModel = {
