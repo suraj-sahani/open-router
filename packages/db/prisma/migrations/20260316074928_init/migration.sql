@@ -14,6 +14,8 @@ CREATE TABLE "ApiKey" (
     "userId" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "apiKey" TEXT NOT NULL,
+    "lastUsed" TIMESTAMP(3),
+    "creditsConsumed" INTEGER NOT NULL DEFAULT 0,
     "disabled" BOOLEAN NOT NULL DEFAULT false,
     "deleted" BOOLEAN NOT NULL DEFAULT false,
 
@@ -85,6 +87,9 @@ CREATE TABLE "Conversation" (
 
 -- CreateIndex
 CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "ApiKey_name_key" ON "ApiKey"("name");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "ApiKey_apiKey_key" ON "ApiKey"("apiKey");
