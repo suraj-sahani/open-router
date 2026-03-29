@@ -41,7 +41,7 @@ export abstract class ModelsService {
   > {
     const providerForModel = await prisma.modelProviderMapping.findMany({
       where: {
-        id: model_id,
+        modelId: model_id,
       },
       include: {
         provider: true,
